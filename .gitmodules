@@ -1,0 +1,3 @@
+[submodule "src/line-automata"]
+	path = src/line-automata
+	url = git@github.com:movinglinguini/line-automata.git
