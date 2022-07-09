@@ -1,31 +1,11 @@
 let automataArr = [];
 
-function parseAutomataConfig(config) {
-  console.log(config);
-  const automataConfig = {
-    x: config.x,
-    y: config.y,
-    baseHue: config.baseHue,
-    colorSaturation: config.colorSaturation,
-    colorLightness: config.colorLightness,
-    hueShift: config.hueShift,
-    drawGrid: config.drawGrid,
-    gridColor: config.gridColor || 'white',
-    canvasWidth: config.w,
-    canvasHeight: config.h,
-  };
+function s(_p5Instance) {
+  _p5Instance.createCanvas(input_file.canvas.w, input_file.canvas.h);
+  _p5Instance.background(input_file.canvas.background);
 
-  return automataConfig;
-}
-
-function s(_p5Instance) {  
-  _p5Instance.createCanvas(document.body.clientWidth, document.body.clientHeight);
-  _p5Instance.background(0);
-
-  
-  input_file.forEach(config => {
-    const automataConfig = parseAutomataConfig(config);
-    automataArr.push(new Automata(automataConfig, _p5Instance));
+  input_file.artists.forEach(config => {
+    automataArr.push(new Automata({ ...config, stepsPerFrame: input_file.global.stepsPerFrame }, _p5Instance));
   });
 }
 

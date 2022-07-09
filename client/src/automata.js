@@ -22,16 +22,18 @@ class Automata {
     this._p5.stroke(this._configObj.gridColor);
     this._p5.noFill();
 
-    this.cellWidth = this._configObj.canvasWidth / this._configObj.resolution;
-    this.cellHeight = this._configObj.canvasHeight / this._configObj.resolution;
-    this.cellCR = [this._p5.random(1, this._configObj.resolution - 2), this._p5.random(1, this._configObj.resolution - 2)];
-    
+    this.cellWidth = this._configObj.w / this._configObj.resolution;
+    this.cellHeight = this._configObj.h / this._configObj.resolution;
+    this.cellCR = [Math.floor(this._p5.random(1, this._configObj.resolution - 1)), Math.ceil(this._p5.random(1, this._configObj.resolution - 2))];
     if (this._configObj.drawGrid) {
-      for (let x = 0; x < this._configObj.canvasWidth; x += this.cellWidth) {
-        for (let y = 0; y < this._configObj.canvasHeight; y += this.cellHeight) {
+      this._p5.push();
+      this._p5.translate(this._configObj.x, this._configObj.y);
+      for (let x = 0; x < this._configObj.w; x += this.cellWidth) {
+        for (let y = 0; y < this._configObj.h; y += this.cellHeight) {
           this._p5.rect(x, y, this.cellWidth, this.cellHeight);
         }
       }
+      this._p5.pop();
     }
 
     // other variables
@@ -44,33 +46,34 @@ class Automata {
   }
 
   setConfigObj(configObj, setDefaults = false) {
-    console.log(configObj);
     if (setDefaults) {
       // set defaults and save
       const x = configObj.x || 0;
       const y = configObj.y || 0;
+      const w = configObj.w || 0;
+      const h = configObj.h || 0;
       const resolution = configObj.resolution || 50;
-      const canvasWidth = configObj.canvasWidth || 400;
-      const canvasHeight = configObj.canvasHeight || 400;
       const baseHue = configObj.baseHue || 263;
       const colorSaturation = configObj.colorSaturation || 0;
       const colorLightness = configObj.colorLightness || 0;
       const hueShift = configObj.hueShift || 0;
       const gridColor = configObj.gridColor || 255;
       const drawGrid = configObj.drawGrid;
+      const stepsPerFrame = configObj.stepsPerFrame || 1;
 
       this._configObj = {
         x,
         y,
+        w,
+        h,
         resolution,
-        canvasWidth,
-        canvasHeight,
         baseHue,
         colorSaturation,
         colorLightness,
         hueShift,
         gridColor,
         drawGrid,
+        stepsPerFrame,
       };
     } else {
       this._configObj = {
@@ -86,21 +89,24 @@ class Automata {
     this._p5.push();
     this._p5.translate(this._configObj.x, this._configObj.y);
 
-    const cellMapKey = `${this.cellCR.join('')}`;
-    if (!this.cellToVisitCount.has(cellMapKey)) {
-      this.cellToVisitCount.set(cellMapKey, 0);
+    for (let i = 0; i < this._configObj.stepsPerFrame; i += 1) {
+      const cellMapKey = `${this.cellCR.join('')}`;
+      if (!this.cellToVisitCount.has(cellMapKey)) {
+        this.cellToVisitCount.set(cellMapKey, 0);
+      }
+      const visitCount = this.cellToVisitCount.get(cellMapKey);
+      this.cellToVisitCount.set(cellMapKey, visitCount + 1);
+  
+      // draw segment
+      const nextCorner = this.drawCurve(this.cellCR[0], this.cellCR[1], this.cellCorner);
+      // pick the next cell to draw through
+      const { chosenNeighbor, startCorner } = this.chooseNeighbor(this.cellCR[0], this.cellCR[1], nextCorner);
+  
+      // save the next cell and start corner for the next iteration
+      this.cellCR = chosenNeighbor;
+      this.cellCorner = startCorner;
     }
-    const visitCount = this.cellToVisitCount.get(cellMapKey);
-    this.cellToVisitCount.set(cellMapKey, visitCount + 1);
 
-    // draw segment
-    const nextCorner = this.drawCurve(this.cellCR[0], this.cellCR[1], this.cellCorner);
-    // pick the next cell to draw through
-    const { chosenNeighbor, startCorner } = this.chooseNeighbor(this.cellCR[0], this.cellCR[1], nextCorner);
-
-    // save the next cell and start corner for the next iteration
-    this.cellCR = chosenNeighbor;
-    this.cellCorner = startCorner;
     this._p5.pop();
   }
 
@@ -166,8 +172,8 @@ class Automata {
       }
     }
   
-    const inBoundsX = (c) => c[0] >= 1 && c[0] < resolution - 1;
-    const inBoundsY = (c) => c[1] >= 1 && c[1] < resolution - 1;
+    const inBoundsX = (c) => c[0] >= 0 && c[0] < resolution;
+    const inBoundsY = (c) => c[1] >= 0 && c[1] < resolution;
   
     potentialNeighbors = potentialNeighbors.filter(n => inBoundsX(n) && inBoundsY(n));
   
