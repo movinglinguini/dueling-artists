@@ -41,8 +41,6 @@ class Automata {
     this.cellCorner = 'tl';
     this.xPos = 0;
     this.yPos = 0;
-
-    console.log(this._configObj);
   }
 
   setConfigObj(configObj, setDefaults = false) {
@@ -53,13 +51,21 @@ class Automata {
       const w = configObj.w || 0;
       const h = configObj.h || 0;
       const resolution = configObj.resolution || 50;
-      const baseHue = configObj.baseHue || 263;
-      const colorSaturation = configObj.colorSaturation || 0;
-      const colorLightness = configObj.colorLightness || 0;
-      const hueShift = configObj.hueShift || 0;
+      const base = configObj.base || {
+        hue: 263,
+        saturation: 0,
+        lightness: 0,
+      };
+      const shift = configObj.shift || {
+        hue: 0,
+        saturation: 0,
+        lightness: 0,
+      };
       const gridColor = configObj.gridColor || 255;
       const drawGrid = configObj.drawGrid;
       const stepsPerFrame = configObj.stepsPerFrame || 1;
+      const name = configObj.name;
+      const showDebug = configObj.showDebug;
 
       this._configObj = {
         x,
@@ -67,13 +73,13 @@ class Automata {
         w,
         h,
         resolution,
-        baseHue,
-        colorSaturation,
-        colorLightness,
-        hueShift,
         gridColor,
         drawGrid,
         stepsPerFrame,
+        base,
+        shift,
+        name,
+        showDebug
       };
     } else {
       this._configObj = {
@@ -89,22 +95,24 @@ class Automata {
     this._p5.push();
     this._p5.translate(this._configObj.x, this._configObj.y);
 
-    for (let i = 0; i < this._configObj.stepsPerFrame; i += 1) {
-      const cellMapKey = `${this.cellCR.join('')}`;
-      if (!this.cellToVisitCount.has(cellMapKey)) {
-        this.cellToVisitCount.set(cellMapKey, 0);
-      }
-      const visitCount = this.cellToVisitCount.get(cellMapKey);
-      this.cellToVisitCount.set(cellMapKey, visitCount + 1);
-  
-      // draw segment
-      const nextCorner = this.drawCurve(this.cellCR[0], this.cellCR[1], this.cellCorner);
-      // pick the next cell to draw through
-      const { chosenNeighbor, startCorner } = this.chooseNeighbor(this.cellCR[0], this.cellCR[1], nextCorner);
-  
-      // save the next cell and start corner for the next iteration
-      this.cellCR = chosenNeighbor;
-      this.cellCorner = startCorner;
+    const cellMapKey = `${this.cellCR.join('')}`;
+    if (!this.cellToVisitCount.has(cellMapKey)) {
+      this.cellToVisitCount.set(cellMapKey, 0);
+    }
+    const visitCount = this.cellToVisitCount.get(cellMapKey);
+    this.cellToVisitCount.set(cellMapKey, visitCount + 1);
+
+    // draw segment
+    const nextCorner = this.drawCurve(this.cellCR[0], this.cellCR[1], this.cellCorner);
+    // pick the next cell to draw through
+    const { chosenNeighbor, startCorner } = this.chooseNeighbor(this.cellCR[0], this.cellCR[1], nextCorner);
+
+    // save the next cell and start corner for the next iteration
+    this.cellCR = chosenNeighbor;
+    this.cellCorner = startCorner;
+
+    if (this._configObj.showDebug) {
+      this.drawDebug();
     }
 
     this._p5.pop();
@@ -114,10 +122,12 @@ class Automata {
     Draws the next line segment on the grid.
   */
   drawCurve(col, row, lastCorner) {
-    const baseHue = this._configObj.baseHue;
-    const colorSaturation = this._configObj.colorSaturation;
-    const colorLightness = this._configObj.colorLightness;
-    const hueShift = this._configObj.hueShift;
+    const baseHue = this._configObj.base.hue;
+    const baseSaturation = this._configObj.base.saturation;
+    const baseLightness = this._configObj.base.lightness;
+    const hueShift = this._configObj.shift.hue;
+    const satShift = this._configObj.shift.saturation;
+    const lightShift = this._configObj.shift.lightness;
 
     const cellMapKey = `${col}${row}`;
     const cellCount = this.cellToVisitCount.get(cellMapKey);
@@ -145,9 +155,11 @@ class Automata {
     const y2 = y1 + yDirection * this.cellHeight;
 
     // if there are line segments in this cell, shift the hue for the color
-    let lineHue = baseHue + (hueShift * (cellCount - 1));
-    lineHue = lineHue % 360;
-    const lineColorHSB = `hsb(${lineHue}, ${colorSaturation}%, ${colorLightness}%)`;
+    let lineHue = (baseHue + (hueShift * (cellCount - 1))) % 360;
+    let lineSat = ((baseSaturation + (satShift * (cellCount - 1)))) % 100;
+    let lineLight = (baseLightness + (lightShift * (cellCount - 1))) % 100;
+    
+    const lineColorHSB = genColorString(Math.abs(lineHue), Math.abs(lineSat), Math.abs(lineLight));
     
     this._p5.strokeWeight(2);
     this._p5.stroke(lineColorHSB);
@@ -199,4 +211,30 @@ class Automata {
   
     return { chosenNeighbor, startCorner };
   }
+
+  drawDebug() {
+    const rectX = 0;
+    const rectY = 0;
+    const textX = rectX + this._configObj.w * 0.5;
+    const textY = rectY + this._configObj.h * 0.5;
+    const sat = 50;
+    const light = 50;
+    const color = genColorString(this._configObj.base.hue, sat, light);
+    const textSize = this._configObj.h * 0.05;
+
+    this._p5.push();
+    this._p5.fill('rgba(0, 0, 0, 0)');
+    this._p5.stroke(color);
+    this._p5.rect(rectX, rectY, this._configObj.w, this._configObj.h);
+    this._p5.textSize(textSize);
+    this._p5.textAlign(this._p5.CENTER);
+    this._p5.fill(color)
+    this._p5.noStroke();
+    this._p5.text(this._configObj.name, textX, textY);
+    this._p5.pop();
+  }
+}
+
+function genColorString(hue, sat, light) {
+  return `hsb(${hue},${sat}%,${light}%)`;
 }

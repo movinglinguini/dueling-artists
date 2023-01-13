@@ -5,12 +5,15 @@ function s(_p5Instance) {
   _p5Instance.background(input_file.canvas.background);
 
   input_file.artists.forEach(config => {
+    console.log(config);
     automataArr.push(new Automata({ ...config, stepsPerFrame: input_file.global.stepsPerFrame }, _p5Instance));
   });
 }
 
 function d(_p5Instance) {
-  automataArr.forEach(automata => automata.draw());
+  for (let i = 0; i < input_file.global.stepsPerFrame; i += 1) {
+    automataArr.forEach(automata => automata.draw());
+  }
 }
 
 const p5InstanceStart = p => {

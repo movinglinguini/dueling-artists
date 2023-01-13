@@ -1,0 +1,116 @@
+{
+  "name": "green-knight-doorway",
+  "canvas": {
+    "w": 500,
+    "h": 500,
+    "background": "hsl(150, 40%, 92%)"
+  },
+  "global": {
+    "stepsPerFrame": 100
+  },
+  "artists": [
+    {
+      "name": "base",
+      "x": 50,
+      "y": 50,
+      "w": 400,
+      "h": 400,
+      "resolution": 2,
+      "baseHue": 240,
+      "hueShift": 50,
+      "baseSaturation": 25,
+      "baseLightness": 15,
+      "drawGrid": false,
+      "gridColor": 23,
+      "base": {
+        "hue": 50,
+        "saturation": 40,
+        "lightness": 90
+      },
+      "shift": {
+        "hue": 0,
+        "saturation": 0,
+        "lightness": 0
+      }
+    },
+    {
+      "name": "door_0",
+      "showDebug": false,
+      "x": 225,
+      "y": 125,
+      "w": 50,
+      "h": 150,
+      "resolution": 100,
+      "baseHue": 240,
+      "hueShift": 50,
+      "baseSaturation": 25,
+      "baseLightness": 15,
+      "drawGrid": false,
+      "gridColor": 23,
+      "base": {
+        "hue": 55,
+        "saturation": 100,
+        "lightness": 92
+      },
+      "shift": {
+        "hue": 0,
+        "saturation": -4,
+        "lightness": 0
+      }
+    },
+    {
+      "name": "door_L",
+      "showDebug": false,
+      "x": 210,
+      "y": 140,
+      "w": 20,
+      "h": 135,
+      "resolution": 100,
+      "baseHue": 240,
+      "hueShift": 50,
+      "baseSaturation": 25,
+      "baseLightness": 15,
+      "drawGrid": false,
+      "gridColor": 23,
+      "base": {
+        "hue": 55,
+        "saturation": 100,
+        "lightness": 90
+      },
+      "shift": {
+        "hue": 0,
+        "saturation": -4,
+        "lightness": 0
+      }
+    },
+    {
+      "name": "door_R",
+      "showDebug": false,
+      "x": 275,
+      "y": 140,
+      "w": 20,
+      "h": 135,
+      "resolution": 100,
+      "baseHue": 240,
+      "hueShift": 50,
+      "baseSaturation": 25,
+      "baseLightness": 15,
+      "drawGrid": false,
+      "gridColor": 23,
+      "base": {
+        "hue": 55,
+        "saturation": 100,
+        "lightness": 90
+      },
+      "shift": {
+        "hue": 0,
+        "saturation": -4,
+        "lightness": 0
+      }
+    },
+    {
+      "name": "wall_R_1",
+      "showDebug": true
+    }
+  ]
+}
